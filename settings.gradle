@@ -1,0 +1,2 @@
+include ':safutilities'
+rootProject.name = "SafUtilities"
