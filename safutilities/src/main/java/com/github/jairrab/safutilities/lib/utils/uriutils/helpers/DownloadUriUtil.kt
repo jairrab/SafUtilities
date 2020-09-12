@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.DocumentsContract
 import android.text.TextUtils
+import com.github.jairrab.safutilities.lib.utils.ContentResolverUtil
 
 internal class DownloadUriUtil(
     private val contentResolverUtil: ContentResolverUtil
@@ -23,7 +25,9 @@ internal class DownloadUriUtil(
     @SuppressLint("NewApi")
     fun getPath(uri: Uri): String? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val displayName = contentResolverUtil.getDisplayName(uri)
+            val displayName = contentResolverUtil.getFileName(uri)
+                ?.let { "${Environment.getExternalStorageDirectory()}/Download/$it" }
+
             if (displayName != null) return displayName
 
             val id = DocumentsContract.getDocumentId(uri)

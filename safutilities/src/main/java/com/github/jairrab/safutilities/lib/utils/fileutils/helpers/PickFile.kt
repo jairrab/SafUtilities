@@ -1,4 +1,4 @@
-package com.github.jairrab.safutilities.lib.utils.fileproviderutils.helpers
+package com.github.jairrab.safutilities.lib.utils.fileutils.helpers
 
 import android.content.Intent
 import android.net.Uri

@@ -6,21 +6,24 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.github.jairrab.safutilities.SafUtilities
+import com.github.jairrab.safutilities.lib.utils.ContentResolverUtil
 import com.github.jairrab.safutilities.lib.utils.appstorageutils.AppStorageUtils
-import com.github.jairrab.safutilities.lib.utils.fileproviderutils.FileProviderUtils
+import com.github.jairrab.safutilities.lib.utils.fileutils.FileUtils
 import com.github.jairrab.safutilities.lib.utils.uriutils.UriUtil
 import com.github.jairrab.safutilities.model.MimeType
 import java.io.File
 import java.io.FileInputStream
 
 internal class SafUtilitiesLibrary(
-    private val fileProviderUtils: FileProviderUtils,
     private val appStorageUtils: AppStorageUtils,
-    private val uriUtil: UriUtil
+    private val contentResolverUtil: ContentResolverUtil,
+    private val fileProviderUtil: FileProviderUtil,
+    private val fileUtils: FileUtils,
+    private val uriUtil: UriUtil,
 ) : SafUtilities {
 
     override fun getContentUri(file: File, authority: String): Uri {
-        return uriUtil.getFileProviderUri(authority, file)
+        return fileProviderUtil.getFileProviderUri(authority, file)
     }
 
     override fun pickFile(
@@ -29,7 +32,7 @@ internal class SafUtilitiesLibrary(
         mimeType: MimeType,
         initialUri: Uri?
     ) {
-        fileProviderUtils.pickFile(fragment, requestCode, mimeType, initialUri)
+        fileUtils.pickFile(fragment, requestCode, mimeType, initialUri)
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -41,7 +44,7 @@ internal class SafUtilitiesLibrary(
         authority: String,
         pickerInitialUri: Uri?,
     ) {
-        fileProviderUtils.createFile(
+        fileUtils.createFile(
             fragment = fragment,
             file = file,
             defaultFileName = defaultFileName,
@@ -57,14 +60,14 @@ internal class SafUtilitiesLibrary(
         pickerInitialUri: Uri?,
         requestCode: Int
     ) {
-        fileProviderUtils.openDirectory(fragment, pickerInitialUri, requestCode)
+        fileUtils.openDirectory(fragment, pickerInitialUri, requestCode)
     }
 
-    override suspend fun copyUriToDirectory(uri: Uri?, destination: File, authority: String): Uri? {
+    override suspend fun copyUriToDirectory(uri: Uri, destination: File, authority: String): Uri? {
         return appStorageUtils.copyUriToDirectory(uri, destination, authority)
     }
 
-    override suspend fun copyUriToFile(uri: Uri?, destination: File, authority: String): Uri? {
+    override suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri? {
         return appStorageUtils.copyUriToFile(uri, destination, authority)
     }
 
@@ -72,16 +75,20 @@ internal class SafUtilitiesLibrary(
         appStorageUtils.copyToExternalStorage(fileToCopy, destinationUri)
     }
 
-    override fun getFileNameFromContentUri(uri: Uri?): String {
-        return uriUtil.getFileNameFromContentUri(uri)
+    override fun getFileNameFromContentUri(uri: Uri): String? {
+        return contentResolverUtil.getFileName(uri)
     }
 
     override fun getFile(uri: Uri): File? {
-        return uriUtil.getFile(uri)
+        return uriUtil.getPath(uri)?.let { File(it) }
     }
 
     override fun getFileInputStream(uri: Uri): FileInputStream? {
-        return uriUtil.getFileInputStream(uri)
+        return contentResolverUtil.getFileInputStream(uri)
+    }
+
+    override fun getUriSize(uri: Uri): Long {
+        return contentResolverUtil.getURISize(uri)
     }
 
     override fun deleteAllUserFiles() {
@@ -90,11 +97,14 @@ internal class SafUtilitiesLibrary(
 
     companion object {
         fun getInstance(context: Context): SafUtilitiesLibrary {
-            val uriUtil = UriUtil.getInstance(context)
+            val contentResolverUtil = ContentResolverUtil(context)
+            val fileProviderUtil = FileProviderUtil(context)
             return SafUtilitiesLibrary(
-                fileProviderUtils = FileProviderUtils.getInstance(uriUtil),
-                appStorageUtils = AppStorageUtils(context, uriUtil),
-                uriUtil = uriUtil
+                appStorageUtils = AppStorageUtils.getInstance(context,contentResolverUtil, fileProviderUtil),
+                contentResolverUtil = contentResolverUtil,
+                fileProviderUtil = fileProviderUtil,
+                fileUtils = FileUtils.getInstance(fileProviderUtil),
+                uriUtil = UriUtil.getInstance(context, contentResolverUtil),
             )
         }
     }

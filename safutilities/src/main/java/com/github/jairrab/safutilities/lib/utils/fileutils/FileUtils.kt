@@ -1,17 +1,18 @@
-package com.github.jairrab.safutilities.lib.utils.fileproviderutils
+package com.github.jairrab.safutilities.lib.utils.fileutils
 
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import com.github.jairrab.safutilities.lib.utils.fileproviderutils.helpers.CreateFile
-import com.github.jairrab.safutilities.lib.utils.fileproviderutils.helpers.OpenDirectory
-import com.github.jairrab.safutilities.lib.utils.fileproviderutils.helpers.PickFile
+import com.github.jairrab.safutilities.lib.FileProviderUtil
+import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.CreateFile
+import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.OpenDirectory
+import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.PickFile
 import com.github.jairrab.safutilities.lib.utils.uriutils.UriUtil
 import com.github.jairrab.safutilities.model.MimeType
 import java.io.File
 
-internal class FileProviderUtils(
+internal class FileUtils(
     private val createFile: CreateFile,
     private val pickFile: PickFile,
     private val openDirectory: OpenDirectory
@@ -63,9 +64,9 @@ internal class FileProviderUtils(
     }
 
     companion object{
-        fun getInstance(uriUtil: UriUtil):FileProviderUtils{
-            return FileProviderUtils(
-                createFile = CreateFile(uriUtil),
+        fun getInstance(fileProviderUtil: FileProviderUtil):FileUtils{
+            return FileUtils(
+                createFile = CreateFile(fileProviderUtil),
                 pickFile = PickFile(),
                 openDirectory = OpenDirectory()
             )

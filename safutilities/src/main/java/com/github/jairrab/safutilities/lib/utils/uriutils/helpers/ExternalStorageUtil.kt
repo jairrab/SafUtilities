@@ -30,8 +30,7 @@ internal class ExternalStorageUtil {
         //
         // so no "primary" type, but let the check here for other devices
         if ("primary".equals(type, ignoreCase = true)) {
-            fullPath =
-                Environment.getExternalStorageDirectory().toString() + relativePath
+            fullPath = Environment.getExternalStorageDirectory().toString() + relativePath
             if (fileExists(fullPath)) {
                 return fullPath
             }

@@ -4,10 +4,11 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import com.github.jairrab.safutilities.lib.utils.ContentResolverUtil
 import java.io.File
 import java.io.FileOutputStream
 
-class MediaFilePathForNUtil(
+internal class MediaFilePathForNUtil(
     private val contentResolverUtil: ContentResolverUtil,
     private val context: Context
 ) {

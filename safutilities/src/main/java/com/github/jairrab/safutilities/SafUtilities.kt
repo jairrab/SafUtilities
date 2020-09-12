@@ -28,17 +28,19 @@ interface SafUtilities {
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun openDirectory(fragment: Fragment, pickerInitialUri: Uri? = null, requestCode: Int)
 
-    suspend fun copyUriToDirectory(uri: Uri?, destination: File, authority: String): Uri?
+    suspend fun copyUriToDirectory(uri: Uri, destination: File, authority: String): Uri?
 
-    suspend fun copyUriToFile(uri: Uri?, destination: File, authority: String): Uri?
+    suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri?
 
     suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri)
 
-    fun getFileNameFromContentUri(uri: Uri?): String
+    fun getFileNameFromContentUri(uri: Uri): String?
 
     fun getFile(uri: Uri): File?
 
     fun getFileInputStream(uri: Uri): FileInputStream?
+
+    fun getUriSize(uri: Uri): Long
 
     fun deleteAllUserFiles()
 

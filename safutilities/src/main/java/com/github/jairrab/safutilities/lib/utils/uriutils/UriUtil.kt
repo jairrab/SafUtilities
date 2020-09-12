@@ -5,55 +5,19 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.os.Build
-import android.provider.DocumentsContract.isDocumentUri
+import android.provider.DocumentsContract
 import androidx.annotation.AnyRes
-import androidx.annotation.RequiresApi
-import androidx.core.content.FileProvider
+import com.github.jairrab.safutilities.lib.utils.ContentResolverUtil
 import com.github.jairrab.safutilities.lib.utils.uriutils.helpers.*
-import java.io.File
-import java.io.FileInputStream
 
-class UriUtil private constructor(
+internal class UriUtil private constructor(
     private val context: Context,
-    private val appDirectoryUriUtil: AppDirectoryUriUtil,
     private val downloadUriUtil: DownloadUriUtil,
     private val externalStorageUtil: ExternalStorageUtil,
     private val mediaDocumentUtil: MediaDocumentUtil,
     private val mediaFilePathForNUtil: MediaFilePathForNUtil,
     private val gDriveUriUtil: GDriveUriUtil,
 ) {
-    /**
-     * Android 10 compliant approach to copying from a URI selected using SAF to
-     * a file stored in the app's directory
-     */
-    suspend fun copyUriToDirectory(uri: Uri?, outputDir: File?): File? {
-        return appDirectoryUriUtil.copyUriToDirectory(uri, outputDir).also {
-            if (outputDir?.exists() == true) {
-                println("^^^ copied uri:${uri?.lastPathSegment} to directory:${outputDir.name}")
-            }
-        }
-    }
-
-    suspend fun copyUriToFile(uri: Uri?, file: File): File? {
-        return appDirectoryUriUtil.copyUriToFile(uri, file)
-    }
-
-    fun getFileNameFromContentUri(uri: Uri?): String {
-        return appDirectoryUriUtil.getFileNameFromUri(uri)
-    }
-
-    fun getFile(uri: Uri): File? {
-        return getPath(uri)?.let { File(it) }
-    }
-
-    fun getFileProviderUri(authority: String, file: File): Uri {
-        return FileProvider.getUriForFile(context, authority, file)
-    }
-
-    fun getFileInputStream(uri: Uri): FileInputStream? {
-        return appDirectoryUriUtil.getFileInputStream(uri)
-    }
-
     fun getUriFromResource(@AnyRes resId: Int): Uri = Uri.parse(
         ContentResolver.SCHEME_ANDROID_RESOURCE +
             "://" + context.resources.getResourcePackageName(resId)
@@ -73,30 +37,24 @@ class UriUtil private constructor(
      */
     fun getPath(uri: Uri?) = uri?.let { u ->
         when {
-            isApi19() && isDocumentUri(context, u) -> when {
+            isApi19() && DocumentsContract.isDocumentUri(context, u) -> when {
                 isExternalStorageDocument(u) -> externalStorageUtil.getPath(u)
-                    .also { println("^^^ isExternalStorageDocument uri: $it") }
                 isDownloadsDocument(u) -> downloadUriUtil.getPath(u)
-                    .also { println("^^^ isDownloadsDocument uri: $it") }
                 isMediaDocument(u) -> mediaDocumentUtil.getPath(u)
-                    .also { println("^^^ isMediaDocument uri: $it") }
                 else -> null
             }
 
             "content".equals(u.scheme, true) -> when {
-                isGooglePhotosUri(u) -> u.lastPathSegment.also { println("^^^ isGooglePhotosUri uri: $it") }
+                isGooglePhotosUri(u) -> u.lastPathSegment
                 isApi24() -> mediaFilePathForNUtil.getPath(u)
-                    .also { println("^^^ isApi24 uri: $it") }
                 else -> u.path
-                //else                 -> u.path.also { println("^^^ content uri: $it") }
             }
 
             "file".equals(u.scheme, true) -> u.path
-            //"file".equals(u.scheme, true)          -> u.path.also { println("^^^ file uri: $it") }
 
-            else -> null.also { println("^^^ uri path is null") }
+            else -> null
         }
-    } ?: null.also { println("^^^ uri path is null") }
+    }
 
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
@@ -111,33 +69,26 @@ class UriUtil private constructor(
     @SuppressLint("NewApi")
     suspend fun getPathWithGDrive(uri: Uri?) = uri?.let { u ->
         when {
-            isApi19() && isDocumentUri(context, u) -> when {
+            isApi19() && DocumentsContract.isDocumentUri(context, u) -> when {
                 isExternalStorageDocument(u) -> externalStorageUtil.getPath(u)
-                    .also { println("^^^ isExternalStorageDocument uri: $it") }
                 isDownloadsDocument(u) -> downloadUriUtil.getPath(u)
-                    .also { println("^^^ isDownloadsDocument uri: $it") }
                 isMediaDocument(u) -> mediaDocumentUtil.getPath(u)
-                    .also { println("^^^ isMediaDocument uri: $it") }
                 isGoogleDriveUri(u) -> gDriveUriUtil.getPath(u)
-                    .also { println("^^^ document isGoogleDriveUri uri: $it") }
                 else -> null
             }
 
             "content".equals(u.scheme, true) -> when {
-                isGooglePhotosUri(u) -> u.lastPathSegment.also { println("^^^ isGooglePhotosUri uri: $it") }
+                isGooglePhotosUri(u) -> u.lastPathSegment
                 isGoogleDriveUri(u) -> gDriveUriUtil.getPath(u)
-                    .also { println("^^^ content isGoogleDriveUri uri: $it") }
                 isApi24() -> mediaFilePathForNUtil.getPath(u)
-                    .also { println("^^^ isApi24 uri: $it") }
-                //else                 -> dataColumnUtil.getDataColumn(u).also { println("^^^ content uri: $it") }
-                else -> u.path.also { println("^^^ content uri: $it") }
+                else -> u.path
             }
 
-            "file".equals(u.scheme, true) -> u.path.also { println("^^^ file uri: $it") }
+            "file".equals(u.scheme, true) -> u.path
 
-            else -> null.also { println("^^^ uri path is null") }
+            else -> null
         }
-    } ?: null.also { println("^^^ uri path is null") }
+    }
 
     private fun isApi24() = Build.VERSION.SDK_INT == Build.VERSION_CODES.N
 
@@ -181,11 +132,9 @@ class UriUtil private constructor(
             uri.authority == "com.google.android.apps.docs.storage.legacy"
 
     companion object {
-        fun getInstance(context: Context): UriUtil {
-            val contentResolverUtil = ContentResolverUtil(context)
+        fun getInstance(context: Context, contentResolverUtil: ContentResolverUtil): UriUtil {
             return UriUtil(
                 context = context,
-                appDirectoryUriUtil = AppDirectoryUriUtil(context),
                 downloadUriUtil = DownloadUriUtil(contentResolverUtil),
                 externalStorageUtil = ExternalStorageUtil(),
                 mediaDocumentUtil = MediaDocumentUtil(contentResolverUtil),

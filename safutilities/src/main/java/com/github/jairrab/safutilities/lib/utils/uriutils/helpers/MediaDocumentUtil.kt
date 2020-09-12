@@ -5,6 +5,7 @@ import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import com.github.jairrab.safutilities.lib.utils.ContentResolverUtil
 
 internal class MediaDocumentUtil(
     private val contentResolverUtil: ContentResolverUtil

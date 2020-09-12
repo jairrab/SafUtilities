@@ -1,4 +1,4 @@
-package com.github.jairrab.safutilities.lib.utils.fileproviderutils.helpers
+package com.github.jairrab.safutilities.lib.utils.fileutils.helpers
 
 import android.content.Intent
 import android.net.Uri
@@ -7,11 +7,11 @@ import android.provider.DocumentsContract
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.github.jairrab.safutilities.functions.mimeType
-import com.github.jairrab.safutilities.lib.utils.uriutils.UriUtil
+import com.github.jairrab.safutilities.lib.FileProviderUtil
 import java.io.File
 
-class CreateFile(
-    private val uriUtil: UriUtil
+internal class CreateFile(
+    private val fileProviderUtil: FileProviderUtil
 ) {
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun execute(
@@ -23,7 +23,7 @@ class CreateFile(
         pickerInitialUri: Uri? = null
     ) {
         val intent = Intent().apply {
-            val uri = uriUtil.getFileProviderUri(authority, file)
+            val uri = fileProviderUtil.getFileProviderUri(authority, file)
             addCategory(Intent.CATEGORY_OPENABLE)
             action = Intent.ACTION_CREATE_DOCUMENT
             type = file.extension.mimeType()
