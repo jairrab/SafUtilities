@@ -1,4 +1,4 @@
-package com.github.jairrab.safutilities.lib.utils.uriutilhelpers
+package com.github.jairrab.safutilities.lib.utils.uriutils.helpers
 
 import android.content.ContentResolver
 import android.content.Context
@@ -13,21 +13,21 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-internal class ContentResolverUtil(
+internal class AppDirectoryUriUtil(
     private val context: Context
 ) {
     // read https://medium.com/@sriramaripirala/android-10-open-failed-eacces-permission-denied-da8b630a89df
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    suspend fun copyUriToDirectory(uri: Uri?, outputDir: File?): File? = coroutineScope {
-        if (outputDir?.exists() == false) {
-            outputDir.mkdirs()
-                .also { println("^^^ creating directory $outputDir") }
+    suspend fun copyUriToDirectory(uri: Uri?, outputDir: File?): File? {
+        return withContext(Dispatchers.Default) {
+            if (outputDir?.exists() == false) {
+                outputDir.mkdirs()
+                    .also { println("^^^ creating directory $outputDir") }
+            }
+            val outputFile = File(outputDir, getFileNameFromUri(uri))
+            copyUriToFile(uri, outputFile)
         }
-        val outputFile = File(outputDir, getFileNameFromUri(uri))
-        copyUriToFile(uri, outputFile)
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun copyUriToFile(uri: Uri?, outputFile: File): File? {
         return withContext(Dispatchers.Default) {
@@ -40,10 +40,14 @@ internal class ContentResolverUtil(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun getFileInputStream(uri: Uri): FileInputStream? {
-        return context.contentResolver.openFileDescriptor(uri, "r", null)
-            ?.let { FileInputStream(it.fileDescriptor) }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            context.contentResolver.openFileDescriptor(uri, "r", null)
+                ?.let { FileInputStream(it.fileDescriptor) }
+        } else {
+            context.contentResolver.openFileDescriptor(uri, "r")
+                ?.let { FileInputStream(it.fileDescriptor) }
+        }
     }
 
     fun getFileNameFromUri(uri: Uri?): String {

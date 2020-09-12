@@ -1,4 +1,4 @@
-package com.github.jairrab.safutilities.lib.utils
+package com.github.jairrab.safutilities.lib.utils.uriutils
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
@@ -9,13 +9,13 @@ import android.provider.DocumentsContract.isDocumentUri
 import androidx.annotation.AnyRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
-import com.github.jairrab.safutilities.lib.utils.uriutilhelpers.*
+import com.github.jairrab.safutilities.lib.utils.uriutils.helpers.*
 import java.io.File
 import java.io.FileInputStream
 
 class UriUtil private constructor(
     private val context: Context,
-    private val contentResolverUtil: ContentResolverUtil,
+    private val appDirectoryUriUtil: AppDirectoryUriUtil,
     private val downloadUriUtil: DownloadUriUtil,
     private val externalStorageUtil: ExternalStorageUtil,
     private val mediaDocumentUtil: MediaDocumentUtil,
@@ -26,27 +26,20 @@ class UriUtil private constructor(
      * Android 10 compliant approach to copying from a URI selected using SAF to
      * a file stored in the app's directory
      */
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     suspend fun copyUriToDirectory(uri: Uri?, outputDir: File?): File? {
-        return contentResolverUtil.copyUriToDirectory(uri, outputDir).also {
+        return appDirectoryUriUtil.copyUriToDirectory(uri, outputDir).also {
             if (outputDir?.exists() == true) {
                 println("^^^ copied uri:${uri?.lastPathSegment} to directory:${outputDir.name}")
             }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     suspend fun copyUriToFile(uri: Uri?, file: File): File? {
-        return contentResolverUtil.copyUriToFile(uri, file)
+        return appDirectoryUriUtil.copyUriToFile(uri, file)
     }
-    /*contentResolverUtil.copyUriToFile(uri, file).also {
-        if (file.exists()) {
-            println("^^^ copied uri:${uri?.lastPathSegment} to file:$file")
-        }
-    }*/
 
     fun getFileNameFromContentUri(uri: Uri?): String {
-        return contentResolverUtil.getFileNameFromUri(uri)
+        return appDirectoryUriUtil.getFileNameFromUri(uri)
     }
 
     fun getFile(uri: Uri): File? {
@@ -57,9 +50,8 @@ class UriUtil private constructor(
         return FileProvider.getUriForFile(context, authority, file)
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun getFileInputStream(uri: Uri): FileInputStream? {
-        return contentResolverUtil.getFileInputStream(uri)
+        return appDirectoryUriUtil.getFileInputStream(uri)
     }
 
     fun getUriFromResource(@AnyRes resId: Int): Uri = Uri.parse(
@@ -190,15 +182,15 @@ class UriUtil private constructor(
 
     companion object {
         fun getInstance(context: Context): UriUtil {
-            val dataColumnUtil = DataColumnUtil(context)
+            val contentResolverUtil = ContentResolverUtil(context)
             return UriUtil(
                 context = context,
-                contentResolverUtil = ContentResolverUtil(context),
-                downloadUriUtil = DownloadUriUtil(dataColumnUtil, context),
+                appDirectoryUriUtil = AppDirectoryUriUtil(context),
+                downloadUriUtil = DownloadUriUtil(contentResolverUtil),
                 externalStorageUtil = ExternalStorageUtil(),
-                mediaDocumentUtil = MediaDocumentUtil(dataColumnUtil),
-                mediaFilePathForNUtil = MediaFilePathForNUtil(context),
-                gDriveUriUtil = GDriveUriUtil(context),
+                mediaDocumentUtil = MediaDocumentUtil(contentResolverUtil),
+                mediaFilePathForNUtil = MediaFilePathForNUtil(contentResolverUtil, context),
+                gDriveUriUtil = GDriveUriUtil(contentResolverUtil, context),
             )
         }
     }

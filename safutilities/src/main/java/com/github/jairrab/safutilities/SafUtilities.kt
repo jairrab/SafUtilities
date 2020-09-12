@@ -13,13 +13,7 @@ import java.io.FileInputStream
 interface SafUtilities {
     fun getContentUri(file: File, authority: String): Uri
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun pickFile(
-        fragment: Fragment,
-        requestCode: Int,
-        mimeType: MimeType,
-        pickerInitialUri: Uri? = null
-    )
+    fun pickFile(fragment: Fragment, requestCode: Int, mimeType: MimeType, initialUri: Uri? = null)
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun createFile(
@@ -32,14 +26,11 @@ interface SafUtilities {
     )
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun openDirectory(
-        fragment: Fragment,
-        pickerInitialUri: Uri? = null,
-        requestCode: Int
-    )
+    fun openDirectory(fragment: Fragment, pickerInitialUri: Uri? = null, requestCode: Int)
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    suspend fun copyToAppFolder(uri: Uri?, destination: File, authority: String): Uri?
+    suspend fun copyUriToDirectory(uri: Uri?, destination: File, authority: String): Uri?
+
+    suspend fun copyUriToFile(uri: Uri?, destination: File, authority: String): Uri?
 
     suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri)
 
@@ -47,8 +38,9 @@ interface SafUtilities {
 
     fun getFile(uri: Uri): File?
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun getFileInputStream(uri: Uri): FileInputStream?
+
+    fun deleteAllUserFiles()
 
     companion object {
         fun getInstance(context: Context): SafUtilities {

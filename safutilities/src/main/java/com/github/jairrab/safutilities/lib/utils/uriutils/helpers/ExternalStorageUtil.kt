@@ -1,4 +1,4 @@
-package com.github.jairrab.safutilities.lib.utils.uriutilhelpers
+package com.github.jairrab.safutilities.lib.utils.uriutils.helpers
 
 import android.net.Uri
 import android.os.Build
@@ -7,7 +7,7 @@ import android.provider.DocumentsContract
 import androidx.annotation.RequiresApi
 import java.io.File
 
-internal class ExternalStorageUtil() {
+internal class ExternalStorageUtil {
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun getPath(uri: Uri): String? {
         val docId = DocumentsContract.getDocumentId(uri)

@@ -5,11 +5,11 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import com.github.jairrab.safutilities.model.MimeType
 import com.github.jairrab.safutilities.SafUtilities
-import com.github.jairrab.safutilities.lib.utils.AppStorageUtils
-import com.github.jairrab.safutilities.lib.utils.FileProviderUtils
-import com.github.jairrab.safutilities.lib.utils.UriUtil
+import com.github.jairrab.safutilities.lib.utils.appstorageutils.AppStorageUtils
+import com.github.jairrab.safutilities.lib.utils.fileproviderutils.FileProviderUtils
+import com.github.jairrab.safutilities.lib.utils.uriutils.UriUtil
+import com.github.jairrab.safutilities.model.MimeType
 import java.io.File
 import java.io.FileInputStream
 
@@ -23,14 +23,13 @@ internal class SafUtilitiesLibrary(
         return uriUtil.getFileProviderUri(authority, file)
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun pickFile(
         fragment: Fragment,
         requestCode: Int,
         mimeType: MimeType,
-        pickerInitialUri: Uri?
+        initialUri: Uri?
     ) {
-        fileProviderUtils.pickFile(fragment, requestCode, mimeType, pickerInitialUri)
+        fileProviderUtils.pickFile(fragment, requestCode, mimeType, initialUri)
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -61,9 +60,12 @@ internal class SafUtilitiesLibrary(
         fileProviderUtils.openDirectory(fragment, pickerInitialUri, requestCode)
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    override suspend fun copyToAppFolder(uri: Uri?, destination: File, authority: String): Uri? {
-        return appStorageUtils.copyToAppFolder(uri, destination, authority)
+    override suspend fun copyUriToDirectory(uri: Uri?, destination: File, authority: String): Uri? {
+        return appStorageUtils.copyUriToDirectory(uri, destination, authority)
+    }
+
+    override suspend fun copyUriToFile(uri: Uri?, destination: File, authority: String): Uri? {
+        return appStorageUtils.copyUriToFile(uri, destination, authority)
     }
 
     override suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri) {
@@ -78,16 +80,19 @@ internal class SafUtilitiesLibrary(
         return uriUtil.getFile(uri)
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun getFileInputStream(uri: Uri): FileInputStream? {
         return uriUtil.getFileInputStream(uri)
+    }
+
+    override fun deleteAllUserFiles() {
+        appStorageUtils.deleteAllUserFiles()
     }
 
     companion object {
         fun getInstance(context: Context): SafUtilitiesLibrary {
             val uriUtil = UriUtil.getInstance(context)
             return SafUtilitiesLibrary(
-                fileProviderUtils = FileProviderUtils(uriUtil),
+                fileProviderUtils = FileProviderUtils.getInstance(uriUtil),
                 appStorageUtils = AppStorageUtils(context, uriUtil),
                 uriUtil = uriUtil
             )

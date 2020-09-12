@@ -1,19 +1,14 @@
-package com.github.jairrab.safutilities.lib.utils.uriutilhelpers
+package com.github.jairrab.safutilities.lib.utils.uriutils.helpers
 
 import android.annotation.SuppressLint
 import android.content.ContentUris
-import android.content.Context
-import android.database.Cursor
 import android.net.Uri
 import android.os.Build
-import android.os.Environment.getExternalStorageDirectory
 import android.provider.DocumentsContract
-import android.provider.MediaStore
 import android.text.TextUtils
 
 internal class DownloadUriUtil(
-    private val dataColumnUtil: DataColumnUtil,
-    private val context: Context
+    private val contentResolverUtil: ContentResolverUtil
 ) {
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
@@ -28,26 +23,8 @@ internal class DownloadUriUtil(
     @SuppressLint("NewApi")
     fun getPath(uri: Uri): String? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            var cursor: Cursor? = null
-
-            try {
-                cursor = context.contentResolver.query(
-                    uri,
-                    arrayOf(MediaStore.MediaColumns.DISPLAY_NAME),
-                    null,
-                    null,
-                    null
-                )
-                if (cursor != null && cursor.moveToFirst()) {
-                    val fileName = cursor.getString(0)
-                    val path = "${getExternalStorageDirectory()}/Download/$fileName"
-                    if (!TextUtils.isEmpty(path)) {
-                        return path
-                    }
-                }
-            } finally {
-                cursor?.close()
-            }
+            val displayName = contentResolverUtil.getDisplayName(uri)
+            if (displayName != null) return displayName
 
             val id = DocumentsContract.getDocumentId(uri)
 
@@ -56,25 +33,24 @@ internal class DownloadUriUtil(
                     return id.replaceFirst("raw:".toRegex(), "")
                 }
 
-                val contentUriPrefixesToTry =
-                    arrayOf(
-                        "content://downloads/public_downloads",
-                        "content://downloads/my_downloads"
-                    )
+                val contentUriPrefixesToTry = arrayOf(
+                    "content://downloads/public_downloads",
+                    "content://downloads/my_downloads"
+                )
 
                 for (contentUriPrefix in contentUriPrefixesToTry) {
-                    return try {
+                    try {
                         val contentUri = ContentUris.withAppendedId(
                             Uri.parse(contentUriPrefix),
                             java.lang.Long.valueOf(id)
                         )
-                        dataColumnUtil.getDataColumn(
-                            uri = contentUri,
-                            selection = null,
-                            selectionArgs = null
-                        )
+
+                        val path = contentResolverUtil.getData(contentUri)
+
+                        if (path != null) return path
+
                     } catch (e: NumberFormatException) { //In Android 8 and Android P the id is not a number
-                        uri.path!!.replaceFirst("^/document/raw:".toRegex(), "")
+                        return uri.path!!.replaceFirst("^/document/raw:".toRegex(), "")
                             .replaceFirst("^raw:".toRegex(), "")
                     }
                 }
@@ -95,11 +71,7 @@ internal class DownloadUriUtil(
                 id.toLong()
             )
 
-            return dataColumnUtil.getDataColumn(
-                uri = contentUri,
-                selection = null,
-                selectionArgs = null
-            )
+            return contentResolverUtil.getData(contentUri)
         }
     }
 }
