@@ -25,7 +25,7 @@ internal class DownloadUriUtil(
     @SuppressLint("NewApi")
     fun getPath(uri: Uri): String? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val displayName = contentResolverUtil.getFileName(uri)
+            val displayName = contentResolverUtil.getContentUriFileName(uri)
                 ?.let { "${Environment.getExternalStorageDirectory()}/Download/$it" }
 
             if (displayName != null) return displayName

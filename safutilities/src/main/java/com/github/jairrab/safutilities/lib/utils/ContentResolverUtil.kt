@@ -3,21 +3,32 @@ package com.github.jairrab.safutilities.lib.utils
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.provider.OpenableColumns
 import java.io.FileInputStream
+import java.io.InputStream
 import java.io.OutputStream
 
 internal class ContentResolverUtil(
     private val context: Context
 ) {
-    fun getFileName(uri: Uri): String? {
+    fun getContentUriFileName(uri: Uri): String? {
         return getCursor(
             uri = uri,
             projection = arrayOf(OpenableColumns.DISPLAY_NAME)
         )?.use {
             if (it.moveToFirst()) {
                 it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+            } else null
+        }
+    }
+
+    fun getContentUriData(uri: Uri, projection: String): String? {
+        return getCursor(
+            uri = uri,
+            projection = arrayOf(projection)
+        )?.use {
+            if (it.moveToFirst()) {
+                it.getString(it.getColumnIndex(projection))
             } else null
         }
     }
@@ -66,13 +77,12 @@ internal class ContentResolverUtil(
     }
 
     fun getFileInputStream(uri: Uri): FileInputStream? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            context.contentResolver.openFileDescriptor(uri, "r", null)
-                ?.use { FileInputStream(it.fileDescriptor) }
-        } else {
-            context.contentResolver.openFileDescriptor(uri, "r")
-                ?.use { FileInputStream(it.fileDescriptor) }
-        }
+        return context.contentResolver.openFileDescriptor(uri, "r")
+            ?.use { FileInputStream(it.fileDescriptor) }
+    }
+
+    fun getInputStream(uri: Uri): InputStream? {
+        return context.contentResolver.openInputStream(uri)
     }
 
     fun getOutputStream(uri: Uri): OutputStream? {

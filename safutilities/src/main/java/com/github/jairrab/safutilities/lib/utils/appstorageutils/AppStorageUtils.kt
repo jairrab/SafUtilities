@@ -25,7 +25,7 @@ internal class AppStorageUtils private constructor(
             if (!destination.exists()) {
                 destination.mkdirs()
             }
-            contentResolverUtil.getFileName(uri)?.let { child ->
+            contentResolverUtil.getContentUriFileName(uri)?.let { child ->
                 withContext(Dispatchers.Default) {
                     contentResolverUtil.getFileInputStream(uri)?.let { inputStream ->
                         val outputFile = File(destination, child)

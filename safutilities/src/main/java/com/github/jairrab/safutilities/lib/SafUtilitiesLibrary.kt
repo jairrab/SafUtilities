@@ -13,6 +13,8 @@ import com.github.jairrab.safutilities.lib.utils.uriutils.UriUtil
 import com.github.jairrab.safutilities.model.MimeType
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 internal class SafUtilitiesLibrary(
     private val appStorageUtils: AppStorageUtils,
@@ -75,8 +77,12 @@ internal class SafUtilitiesLibrary(
         appStorageUtils.copyToExternalStorage(fileToCopy, destinationUri)
     }
 
-    override fun getFileNameFromContentUri(uri: Uri): String? {
-        return contentResolverUtil.getFileName(uri)
+    override fun getContentUriFileName(uri: Uri): String? {
+        return contentResolverUtil.getContentUriFileName(uri)
+    }
+
+    override fun getContentUriData(uri: Uri, projection: String): String? {
+        return contentResolverUtil.getContentUriData(uri, projection)
     }
 
     override fun getFile(uri: Uri): File? {
@@ -85,6 +91,14 @@ internal class SafUtilitiesLibrary(
 
     override fun getFileInputStream(uri: Uri): FileInputStream? {
         return contentResolverUtil.getFileInputStream(uri)
+    }
+
+    override fun getInputStream(uri: Uri): InputStream? {
+        return contentResolverUtil.getInputStream(uri)
+    }
+
+    override fun getOutputStream(uri: Uri): OutputStream? {
+        return contentResolverUtil.getOutputStream(uri)
     }
 
     override fun getUriSize(uri: Uri): Long {

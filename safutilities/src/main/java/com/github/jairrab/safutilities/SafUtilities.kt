@@ -9,6 +9,8 @@ import com.github.jairrab.safutilities.lib.SafUtilitiesLibrary
 import com.github.jairrab.safutilities.model.MimeType
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 interface SafUtilities {
     fun getContentUri(file: File, authority: String): Uri
@@ -34,11 +36,17 @@ interface SafUtilities {
 
     suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri)
 
-    fun getFileNameFromContentUri(uri: Uri): String?
+    fun getContentUriFileName(uri: Uri): String?
+
+    fun getContentUriData(uri: Uri, projection: String): String?
 
     fun getFile(uri: Uri): File?
 
     fun getFileInputStream(uri: Uri): FileInputStream?
+
+    fun getInputStream(uri: Uri): InputStream?
+
+    fun getOutputStream(uri: Uri): OutputStream?
 
     fun getUriSize(uri: Uri): Long
 
