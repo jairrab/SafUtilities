@@ -19,27 +19,34 @@ internal class AppStorageUtils private constructor(
      * a file stored in the app's directory
      */
     // read https://medium.com/@sriramaripirala/android-10-open-failed-eacces-permission-denied-da8b630a89df
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun copyUriToDirectory(uri: Uri, destination: File, authority: String): Uri? {
+        return copyUriToDirectory(uri, destination)
+            ?.let { fileProviderUtil.getFileProviderUri(authority, it) }
+    }
+
+    suspend fun copyUriToDirectory(uri: Uri, destination: File): File? {
         return contentResolverUtil.getContentUriFileName(uri)?.let { child ->
             withContext(Dispatchers.Default) {
                 contentResolverUtil.getFileInputStream(uri)?.let {
                     FileUtilities.copyFileToDirectory(it, destination, child)
                 }
             }
-        }?.let { fileProviderUtil.getFileProviderUri(authority, it) }
+        }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri? {
+        return copyUriToFile(uri, destination)
+            ?.let { fileProviderUtil.getFileProviderUri(authority, it) }
+    }
+
+    suspend fun copyUriToFile(uri: Uri, destination: File): File? {
         return withContext(Dispatchers.Default) {
             contentResolverUtil.getFileInputStream(uri)?.let {
                 FileUtilities.copyFile(it, destination)
             }
-        }?.let { fileProviderUtil.getFileProviderUri(authority, it) }
+        }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri) {
         withContext(Dispatchers.IO) {
             contentResolverUtil.getOutputStream(destinationUri)?.use { os ->

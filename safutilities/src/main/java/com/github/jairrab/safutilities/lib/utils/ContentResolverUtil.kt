@@ -3,6 +3,7 @@ package com.github.jairrab.safutilities.lib.utils
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.provider.OpenableColumns
 import java.io.FileInputStream
 import java.io.InputStream
@@ -77,8 +78,12 @@ internal class ContentResolverUtil(
     }
 
     fun getFileInputStream(uri: Uri): FileInputStream? {
-        return context.contentResolver.openFileDescriptor(uri, "r")
-            ?.use { FileInputStream(it.fileDescriptor) }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.contentResolver.openFileDescriptor(uri, "r")
+                ?.use { FileInputStream(it.fileDescriptor) }
+        } else {
+            getInputStream(uri) as? FileInputStream
+        }
     }
 
     fun getInputStream(uri: Uri): InputStream? {

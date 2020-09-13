@@ -69,8 +69,16 @@ internal class SafUtilitiesLibrary(
         return appStorageUtils.copyUriToDirectory(uri, destination, authority)
     }
 
+    override suspend fun copyUriToDirectory(uri: Uri, destination: File): File? {
+        return appStorageUtils.copyUriToDirectory(uri, destination)
+    }
+
     override suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri? {
         return appStorageUtils.copyUriToFile(uri, destination, authority)
+    }
+
+    override suspend fun copyUriToFile(uri: Uri, destination: File): File? {
+        return appStorageUtils.copyUriToFile(uri, destination)
     }
 
     override suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri) {

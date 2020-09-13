@@ -32,7 +32,11 @@ interface SafUtilities {
 
     suspend fun copyUriToDirectory(uri: Uri, destination: File, authority: String): Uri?
 
+    suspend fun copyUriToDirectory(uri: Uri, destination: File): File?
+
     suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri?
+
+    suspend fun copyUriToFile(uri: Uri, destination: File): File?
 
     suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri)
 
