@@ -26,8 +26,8 @@ internal class AppStorageUtils private constructor(
 
     suspend fun copyUriToDirectory(uri: Uri, destination: File): File? {
         return contentResolverUtil.getContentUriFileName(uri)?.let { child ->
-            withContext(Dispatchers.Default) {
-                contentResolverUtil.getFileInputStream(uri)?.let {
+            withContext(Dispatchers.IO) {
+                contentResolverUtil.getInputStream(uri)?.let {
                     FileUtilities.copyFileToDirectory(it, destination, child)
                 }
             }
@@ -40,8 +40,8 @@ internal class AppStorageUtils private constructor(
     }
 
     suspend fun copyUriToFile(uri: Uri, destination: File): File? {
-        return withContext(Dispatchers.Default) {
-            contentResolverUtil.getFileInputStream(uri)?.let {
+        return withContext(Dispatchers.IO) {
+            contentResolverUtil.getInputStream(uri)?.let {
                 FileUtilities.copyFile(it, destination)
             }
         }
