@@ -13,32 +13,66 @@ import java.io.InputStream
 import java.io.OutputStream
 
 interface SafUtilities {
+    /** Return a content URI for a given File. */
     fun getContentUri(file: File, authority: String): Uri
 
-    fun pickFile(fragment: Fragment, requestCode: Int, mimeType: MimeType, initialUri: Uri? = null)
-
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun createFile(
+    /** Picks file using SAF. */
+    fun pickFile(
         fragment: Fragment,
-        file: File,
-        defaultFileName: String,
         requestCode: Int,
-        authority: String,
+        mimeType: MimeType,
+        initialUri: Uri? = null
+    )
+
+    /**
+     * Opens save dialog SAF file picker.
+     * @param file File to save
+     * @param defaultFileName Default file name or name of [file] if none provided
+     */
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun openSavePicker(
+        fragment: Fragment,
+        requestCode: Int,
+        file: File,
+        defaultFileName: String? = null,
         pickerInitialUri: Uri? = null
     )
 
+    /** Pick directory using SAF */
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun openDirectory(fragment: Fragment, pickerInitialUri: Uri? = null, requestCode: Int)
+    fun pickDirectory(
+        fragment: Fragment,
+        requestCode: Int,
+        pickerInitialUri: Uri? = null,
+    )
 
-    suspend fun copyUriToDirectory(uri: Uri, destination: File, authority: String): Uri?
+    /** Save given [inputFile] to [outputUri] that is of type content uri */
+    suspend fun saveFileToContentUri(inputFile: File, outputUri: Uri)
 
-    suspend fun copyUriToDirectory(uri: Uri, destination: File): File?
+    /**
+     * Save given [inputUri] of type content uri to [outputDirectory]. Returns a
+     * content uri provided by given [authority]
+     **/
+    suspend fun saveContentUriToDirectory(
+        inputUri: Uri,
+        outputDirectory: File,
+        authority: String
+    ): Uri?
 
-    suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri?
+    /** Save given [inputUri] of type content uri to [outputDirectory] */
+    suspend fun saveContentUriToDirectory(
+        inputUri: Uri,
+        outputDirectory: File
+    ): File?
 
-    suspend fun copyUriToFile(uri: Uri, destination: File): File?
+    /**
+     * Save given [inputUri] of type content uri to [outputFile]. Returns a
+     * content uri provided by given [authority]
+     **/
+    suspend fun saveContentUriToFile(inputUri: Uri, outputFile: File, authority: String): Uri?
 
-    suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri)
+    /** Save given [inputUri] of type content uri to [outputFile] */
+    suspend fun saveContentUriToFile(inputUri: Uri, outputFile: File): File?
 
     fun getContentUriFileName(uri: Uri): String?
 
@@ -57,6 +91,8 @@ interface SafUtilities {
     fun deleteAllUserFiles()
 
     companion object {
+        const val LOG_TAG = "SafUtilities"
+
         fun getInstance(context: Context): SafUtilities {
             return SafUtilitiesLibrary.getInstance(context)
         }

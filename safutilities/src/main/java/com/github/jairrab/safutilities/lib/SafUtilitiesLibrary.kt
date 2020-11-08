@@ -38,51 +38,56 @@ internal class SafUtilitiesLibrary(
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    override fun createFile(
+    override fun openSavePicker(
         fragment: Fragment,
-        file: File,
-        defaultFileName: String,
         requestCode: Int,
-        authority: String,
+        file: File,
+        defaultFileName: String?,
         pickerInitialUri: Uri?,
     ) {
-        fileUtils.createFile(
-            fragment = fragment,
-            file = file,
-            defaultFileName = defaultFileName,
-            requestCode = requestCode,
-            authority = authority,
-            pickerInitialUri = pickerInitialUri
+        fileUtils.openSavePicker(
+                fragment = fragment,
+                file = file,
+                defaultFileName = defaultFileName,
+                requestCode = requestCode,
+                pickerInitialUri = pickerInitialUri
         )
     }
 
+    override suspend fun saveFileToContentUri(inputFile: File, outputUri: Uri) {
+        appStorageUtils.saveFileToContentUri(inputFile, outputUri)
+    }
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun openDirectory(
+    override fun pickDirectory(
         fragment: Fragment,
+        requestCode: Int,
         pickerInitialUri: Uri?,
-        requestCode: Int
     ) {
-        fileUtils.openDirectory(fragment, pickerInitialUri, requestCode)
+        fileUtils.pickDirectory(fragment, requestCode, pickerInitialUri)
     }
 
-    override suspend fun copyUriToDirectory(uri: Uri, destination: File, authority: String): Uri? {
-        return appStorageUtils.copyUriToDirectory(uri, destination, authority)
+    override suspend fun saveContentUriToDirectory(
+        inputUri: Uri,
+        outputDirectory: File,
+        authority: String
+    ): Uri? {
+        return appStorageUtils.saveContentUriToDirectory(inputUri, outputDirectory, authority)
     }
 
-    override suspend fun copyUriToDirectory(uri: Uri, destination: File): File? {
-        return appStorageUtils.copyUriToDirectory(uri, destination)
+    override suspend fun saveContentUriToDirectory(
+        inputUri: Uri,
+        outputDirectory: File
+    ): File? {
+        return appStorageUtils.saveContentUriToDirectory(inputUri, outputDirectory)
     }
 
-    override suspend fun copyUriToFile(uri: Uri, destination: File, authority: String): Uri? {
-        return appStorageUtils.copyUriToFile(uri, destination, authority)
+    override suspend fun saveContentUriToFile(inputUri: Uri, outputFile: File, authority: String): Uri? {
+        return appStorageUtils.saveContentUriToFile(inputUri, outputFile, authority)
     }
 
-    override suspend fun copyUriToFile(uri: Uri, destination: File): File? {
-        return appStorageUtils.copyUriToFile(uri, destination)
-    }
-
-    override suspend fun copyToExternalStorage(fileToCopy: File, destinationUri: Uri) {
-        appStorageUtils.copyToExternalStorage(fileToCopy, destinationUri)
+    override suspend fun saveContentUriToFile(inputUri: Uri, outputFile: File): File? {
+        return appStorageUtils.saveContentUriToFile(inputUri, outputFile)
     }
 
     override fun getContentUriFileName(uri: Uri): String? {

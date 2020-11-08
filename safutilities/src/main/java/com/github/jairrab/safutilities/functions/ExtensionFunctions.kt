@@ -15,9 +15,9 @@ fun Uri.toJavaUri(): URI {
 fun String.mimeType(): String {
     return when (this) {
         "jpg", "png" -> "image/*"
-        "csv"        -> "text/csv"
-        "html"       -> "text/html"
-        "pdf"        -> "application/pdf"
-        else         -> URLConnection.guessContentTypeFromName("filename.$this")
+        "csv" -> "text/csv"
+        "html" -> "text/html"
+        "pdf" -> "application/pdf"
+        else -> URLConnection.guessContentTypeFromName("filename.$this") ?: "*/*"
     }
 }

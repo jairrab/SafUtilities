@@ -5,17 +5,16 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.github.jairrab.safutilities.lib.FileProviderUtil
-import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.CreateFile
-import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.OpenDirectory
+import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.OpenSavePicker
+import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.PickDirectory
 import com.github.jairrab.safutilities.lib.utils.fileutils.helpers.PickFile
-import com.github.jairrab.safutilities.lib.utils.uriutils.UriUtil
 import com.github.jairrab.safutilities.model.MimeType
 import java.io.File
 
 internal class FileUtils(
-    private val createFile: CreateFile,
+    private val openSavePicker: OpenSavePicker,
+    private val pickDirectory: PickDirectory,
     private val pickFile: PickFile,
-    private val openDirectory: OpenDirectory
 ) {
     fun pickFile(
         fragment: Fragment,
@@ -32,43 +31,41 @@ internal class FileUtils(
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun createFile(
+    fun openSavePicker(
         fragment: Fragment,
-        file: File,
-        defaultFileName: String,
         requestCode: Int,
-        authority: String,
+        file: File,
+        defaultFileName: String?,
         pickerInitialUri: Uri?,
-    ){
-        createFile.execute(
+    ) {
+        openSavePicker.execute(
             fragment = fragment,
             file = file,
             defaultFileName = defaultFileName,
             requestCode = requestCode,
-            authority = authority,
             pickerInitialUri = pickerInitialUri
         )
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun openDirectory(
+    fun pickDirectory(
         fragment: Fragment,
-        initialUri: Uri? = null,
-        requestCode: Int
+        requestCode: Int,
+        initialUri: Uri? = null
     ) {
-        openDirectory.execute(
+        pickDirectory.execute(
             fragment = fragment,
-            pickerInitialUri = initialUri,
-            requestCode = requestCode
+            requestCode = requestCode,
+            pickerInitialUri = initialUri
         )
     }
 
     companion object{
         fun getInstance(fileProviderUtil: FileProviderUtil):FileUtils{
             return FileUtils(
-                createFile = CreateFile(fileProviderUtil),
+                openSavePicker = OpenSavePicker(),
                 pickFile = PickFile(),
-                openDirectory = OpenDirectory()
+                pickDirectory = PickDirectory()
             )
         }
     }
