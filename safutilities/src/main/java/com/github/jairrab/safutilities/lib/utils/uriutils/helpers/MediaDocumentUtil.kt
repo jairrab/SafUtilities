@@ -20,6 +20,6 @@ internal class MediaDocumentUtil(
             "audio" -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
             else -> return null
         }
-        return contentResolverUtil.getData(contentUri, "_id=?", arrayOf(split[1]))
+        return contentResolverUtil.getContentUriData(contentUri, "_id=?", arrayOf(split[1]))
     }
 }

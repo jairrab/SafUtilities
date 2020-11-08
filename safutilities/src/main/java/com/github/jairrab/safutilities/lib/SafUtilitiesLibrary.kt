@@ -3,9 +3,11 @@ package com.github.jairrab.safutilities.lib
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.github.jairrab.safutilities.SafUtilities
+import com.github.jairrab.safutilities.SafUtilities.Companion.LOG_TAG
 import com.github.jairrab.safutilities.lib.utils.ContentResolverUtil
 import com.github.jairrab.safutilities.lib.utils.appstorageutils.AppStorageUtils
 import com.github.jairrab.safutilities.lib.utils.fileutils.FileUtils
@@ -23,11 +25,6 @@ internal class SafUtilitiesLibrary(
     private val fileUtils: FileUtils,
     private val uriUtil: UriUtil,
 ) : SafUtilities {
-
-    override fun getContentUri(file: File, authority: String): Uri {
-        return fileProviderUtil.getFileProviderUri(authority, file)
-    }
-
     override fun pickFile(
         fragment: Fragment,
         requestCode: Int,
@@ -35,6 +32,15 @@ internal class SafUtilitiesLibrary(
         initialUri: Uri?
     ) {
         fileUtils.pickFile(fragment, requestCode, mimeType, initialUri)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun pickDirectory(
+        fragment: Fragment,
+        requestCode: Int,
+        pickerInitialUri: Uri?,
+    ) {
+        fileUtils.pickDirectory(fragment, requestCode, pickerInitialUri)
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -58,15 +64,6 @@ internal class SafUtilitiesLibrary(
         appStorageUtils.saveFileToContentUri(inputFile, outputUri)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun pickDirectory(
-        fragment: Fragment,
-        requestCode: Int,
-        pickerInitialUri: Uri?,
-    ) {
-        fileUtils.pickDirectory(fragment, requestCode, pickerInitialUri)
-    }
-
     override suspend fun saveContentUriToDirectory(
         inputUri: Uri,
         outputDirectory: File,
@@ -82,7 +79,11 @@ internal class SafUtilitiesLibrary(
         return appStorageUtils.saveContentUriToDirectory(inputUri, outputDirectory)
     }
 
-    override suspend fun saveContentUriToFile(inputUri: Uri, outputFile: File, authority: String): Uri? {
+    override suspend fun saveContentUriToFile(
+        inputUri: Uri,
+        outputFile: File,
+        authority: String
+    ): Uri? {
         return appStorageUtils.saveContentUriToFile(inputUri, outputFile, authority)
     }
 
@@ -90,16 +91,32 @@ internal class SafUtilitiesLibrary(
         return appStorageUtils.saveContentUriToFile(inputUri, outputFile)
     }
 
+    override fun getContentUri(file: File, authority: String): Uri {
+        return fileProviderUtil.getFileProviderUri(authority, file)
+    }
+
     override fun getContentUriFileName(uri: Uri): String? {
         return contentResolverUtil.getContentUriFileName(uri)
     }
 
-    override fun getContentUriData(uri: Uri, projection: String): String? {
-        return contentResolverUtil.getContentUriData(uri, projection)
+    override fun getContentUriSize(uri: Uri): Long {
+        return contentResolverUtil.getContentUriSize(uri)
+    }
+
+    override fun getContentUriInfo(uri: Uri, projection: String): String? {
+        return contentResolverUtil.getContentUriInfo(uri, projection)
     }
 
     override fun getFile(uri: Uri): File? {
-        return uriUtil.getPath(uri)?.let { File(it) }
+        val path = uriUtil.getPath(uri)
+        return if (path != null) {
+            val file = File(path)
+            Log.v(LOG_TAG, "Uri $uri returns file $file")
+            file
+        } else {
+            Log.e(LOG_TAG, "Invalid uri")
+            null
+        }
     }
 
     override fun getFileInputStream(uri: Uri): FileInputStream? {
@@ -114,10 +131,6 @@ internal class SafUtilitiesLibrary(
         return contentResolverUtil.getOutputStream(uri)
     }
 
-    override fun getUriSize(uri: Uri): Long {
-        return contentResolverUtil.getURISize(uri)
-    }
-
     override fun deleteAllUserFiles() {
         appStorageUtils.deleteAllUserFiles()
     }
@@ -127,7 +140,11 @@ internal class SafUtilitiesLibrary(
             val contentResolverUtil = ContentResolverUtil(context)
             val fileProviderUtil = FileProviderUtil(context)
             return SafUtilitiesLibrary(
-                appStorageUtils = AppStorageUtils.getInstance(context,contentResolverUtil, fileProviderUtil),
+                appStorageUtils = AppStorageUtils.getInstance(
+                    context = context,
+                    contentResolverUtil = contentResolverUtil,
+                    fileProviderUtil = fileProviderUtil
+                ),
                 contentResolverUtil = contentResolverUtil,
                 fileProviderUtil = fileProviderUtil,
                 fileUtils = FileUtils.getInstance(fileProviderUtil),

@@ -49,7 +49,7 @@ internal class DownloadUriUtil(
                             java.lang.Long.valueOf(id)
                         )
 
-                        val path = contentResolverUtil.getData(contentUri)
+                        val path = contentResolverUtil.getContentUriData(contentUri)
 
                         if (path != null) return path
 
@@ -75,7 +75,7 @@ internal class DownloadUriUtil(
                 id.toLong()
             )
 
-            return contentResolverUtil.getData(contentUri)
+            return contentResolverUtil.getContentUriData(contentUri)
         }
     }
 }

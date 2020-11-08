@@ -13,15 +13,20 @@ import java.io.InputStream
 import java.io.OutputStream
 
 interface SafUtilities {
-    /** Return a content URI for a given File. */
-    fun getContentUri(file: File, authority: String): Uri
-
     /** Picks file using SAF. */
     fun pickFile(
         fragment: Fragment,
         requestCode: Int,
         mimeType: MimeType,
         initialUri: Uri? = null
+    )
+
+    /** Pick directory using SAF */
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun pickDirectory(
+        fragment: Fragment,
+        requestCode: Int,
+        pickerInitialUri: Uri? = null,
     )
 
     /**
@@ -36,14 +41,6 @@ interface SafUtilities {
         file: File,
         defaultFileName: String? = null,
         pickerInitialUri: Uri? = null
-    )
-
-    /** Pick directory using SAF */
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun pickDirectory(
-        fragment: Fragment,
-        requestCode: Int,
-        pickerInitialUri: Uri? = null,
     )
 
     /** Save given [inputFile] to [outputUri] that is of type content uri */
@@ -74,20 +71,31 @@ interface SafUtilities {
     /** Save given [inputUri] of type content uri to [outputFile] */
     suspend fun saveContentUriToFile(inputUri: Uri, outputFile: File): File?
 
+    /** Return a content URI for a given File. */
+    fun getContentUri(file: File, authority: String): Uri
+
+    /** Gets file name from given [uri] of type content uri */
     fun getContentUriFileName(uri: Uri): String?
 
-    fun getContentUriData(uri: Uri, projection: String): String?
+    /** Gets file size from given [uri] of type content uri */
+    fun getContentUriSize(uri: Uri): Long
 
+    /** Gets uri info from given [uri] and column projection given by [projection] */
+    fun getContentUriInfo(uri: Uri, projection: String): String?
+
+    /** Gets [File] from given [uri] */
     fun getFile(uri: Uri): File?
 
+    /** Gets [FileInputStream] from given [uri] */
     fun getFileInputStream(uri: Uri): FileInputStream?
 
+    /** Gets [InputStream] from given [uri] */
     fun getInputStream(uri: Uri): InputStream?
 
+    /** Gets [OutputStream] from given [uri] */
     fun getOutputStream(uri: Uri): OutputStream?
 
-    fun getUriSize(uri: Uri): Long
-
+    /** Deletes all user files */
     fun deleteAllUserFiles()
 
     companion object {
